@@ -21,6 +21,7 @@ module.exports = function(config) {
       {pattern: 'node_modules/rxjs/bundles/Rx.js', included: true},
       {pattern: 'node_modules/angular2/bundles/angular2.js', included: true},
       {pattern: 'node_modules/angular2/bundles/testing.js', included: true},
+      'dist/**/*.js',
       'test/**/*Spec.js'
     ],
 
