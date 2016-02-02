@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from 'angular2/core';
-import {FormBuilder, AbstractControl, ControlGroup} from 'angular2/common';
+import {FormBuilder, AbstractControl, ControlGroup, Control} from 'angular2/common';
 import {CustomValidationHandler, IValidation} from './custom_validation'
 import {ConditionalDisplay, IConditionalDisplay} from './conditional_display';
 
@@ -74,6 +74,7 @@ export class CustomForm implements OnInit{
   @Input() conditionalDisplay: IConditionalDisplay[];
 
   public  localForm: ControlGroup;
+  public  controls: { [name: string]: Control };
   public  validationsHandler: CustomValidationHandler;
   public  errorPool = {};
   private displayHandler: ConditionalDisplay;
@@ -85,26 +86,16 @@ export class CustomForm implements OnInit{
 
     this.validationsHandler = new CustomValidationHandler(this.model, this.validationsJson, this.isVisible.bind(this));
 
-    this.localForm = this.builder.group(this.formParams())
+    this.buildFormParams();
 
-    window.foo = this;
+    this.localForm = this.builder.group(this.controls);
 
     this.localForm.valueChanges.subscribe((v)=>{
       this.displayHandler.updateVisibility();
+      this.toggleControls();
     });
 
-    _.each(this.fields, (field)=> {
-      this.errorPool[field.name] = [];
-
-      this.getControl(field).valueChanges.subscribe(()=>{
-        this.errorPool[field.name] = _.reduce(this.getControl(field).errors, function(array, error){
-          if (_.has(error, 'messageFn'))
-            array.push(error.messageFn);
-          return array;
-        }, []);
-      });
-
-    });
+    this.fetchErrors();
   }
 
   isVisible(fieldName: string): Boolean{
@@ -116,18 +107,43 @@ export class CustomForm implements OnInit{
   }
 
   getControl(field: ICustomField): AbstractControl{
-    return this.localForm.controls[field.name];
+    return this.controls[field.name];
   }
 
   errorFor(field: ICustomField): Function[]{
     return this.errorPool[field.name];
   }
 
-  private formParams(){
-    return _.reduce(this.fields, (obj, field)=>{
-      obj[field.name] = ["", this.validationsHandler.for(field.name)];
+  private buildFormParams(){
+    this.controls = _.reduce(this.fields, (obj, field)=>{
+      obj[field.name] = new Control("", this.validationsHandler.for(field.name));
       return obj;
     }, {});
+  }
+
+  private fetchErrors(){
+    _.each(this.fields, (field)=> {
+      this.errorPool[field.name] = [];
+
+      this.getControl(field).valueChanges.subscribe(()=>{
+        this.errorPool[field.name] = _.reduce(this.getControl(field).errors, (array, error)=>{
+          if (this.isVisible(field.name) && _.has(error, 'messageFn'))
+            array.push(error.messageFn);
+          return array;
+        }, []);
+      });
+    });
+  }
+
+  private toggleControls(){
+    _.each(this.controls, (control, name)=>{
+      if(!this.isVisible(name) && this.localForm.contains(name)){
+        this.localForm.exclude(name);
+      }
+      if(this.isVisible(name) && !this.localForm.contains(name)){
+        this.localForm.include(name);
+      }
+    });
   }
 
 }

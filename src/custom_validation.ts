@@ -1,7 +1,5 @@
 import {Validators, AbstractControl} from 'angular2/common';
 
- declare var Promise;
-
 export interface IValidation {
   name: string,
   field: string,
@@ -59,7 +57,7 @@ export class CustomValidationHandler {
     this.processValidationJson(validationsJson);
   }
 
-  for(fieldName):Function[] {
+  for(fieldName):Function {
     return this.handler[fieldName];
   }
 
