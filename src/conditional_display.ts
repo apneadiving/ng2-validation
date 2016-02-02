@@ -1,3 +1,5 @@
+declare var _;
+
 export interface IConditionalDisplay {
   field: string,
   condition: ICondition

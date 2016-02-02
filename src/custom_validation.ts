@@ -1,4 +1,5 @@
 import {Validators, AbstractControl} from 'angular2/common';
+declare var _;
 
 export interface IValidation {
   name: string,

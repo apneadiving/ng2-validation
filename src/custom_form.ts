@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from 'angular2/core';
 import {FormBuilder, AbstractControl, ControlGroup, Control} from 'angular2/common';
 import {CustomValidationHandler, IValidation} from './custom_validation'
 import {ConditionalDisplay, IConditionalDisplay} from './conditional_display';
+declare var _;
 
 interface ICheckboxChoice {
   name:    any,
